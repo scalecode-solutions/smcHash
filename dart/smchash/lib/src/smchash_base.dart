@@ -116,14 +116,22 @@ int smchashSeeded(List<int> data, int seed) {
     int see5 = seed, see6 = seed, see7 = seed;
 
     while (i > 128) {
-      seed = _mix(_read64(data, offset) ^ _smcSecret[0], _read64(data, offset + 8) ^ seed);
-      see1 = _mix(_read64(data, offset + 16) ^ _smcSecret[1], _read64(data, offset + 24) ^ see1);
-      see2 = _mix(_read64(data, offset + 32) ^ _smcSecret[2], _read64(data, offset + 40) ^ see2);
-      see3 = _mix(_read64(data, offset + 48) ^ _smcSecret[3], _read64(data, offset + 56) ^ see3);
-      see4 = _mix(_read64(data, offset + 64) ^ _smcSecret[4], _read64(data, offset + 72) ^ see4);
-      see5 = _mix(_read64(data, offset + 80) ^ _smcSecret[5], _read64(data, offset + 88) ^ see5);
-      see6 = _mix(_read64(data, offset + 96) ^ _smcSecret[6], _read64(data, offset + 104) ^ see6);
-      see7 = _mix(_read64(data, offset + 112) ^ _smcSecret[7], _read64(data, offset + 120) ^ see7);
+      seed = _mix(_read64(data, offset) ^ _smcSecret[0],
+          _read64(data, offset + 8) ^ seed);
+      see1 = _mix(_read64(data, offset + 16) ^ _smcSecret[1],
+          _read64(data, offset + 24) ^ see1);
+      see2 = _mix(_read64(data, offset + 32) ^ _smcSecret[2],
+          _read64(data, offset + 40) ^ see2);
+      see3 = _mix(_read64(data, offset + 48) ^ _smcSecret[3],
+          _read64(data, offset + 56) ^ see3);
+      see4 = _mix(_read64(data, offset + 64) ^ _smcSecret[4],
+          _read64(data, offset + 72) ^ see4);
+      see5 = _mix(_read64(data, offset + 80) ^ _smcSecret[5],
+          _read64(data, offset + 88) ^ see5);
+      see6 = _mix(_read64(data, offset + 96) ^ _smcSecret[6],
+          _read64(data, offset + 104) ^ see6);
+      see7 = _mix(_read64(data, offset + 112) ^ _smcSecret[7],
+          _read64(data, offset + 120) ^ see7);
       offset += 128;
       i -= 128;
     }
@@ -134,21 +142,28 @@ int smchashSeeded(List<int> data, int seed) {
   }
 
   if (i > 64) {
-    seed = _mix(_read64(data, offset) ^ _smcSecret[0], _read64(data, offset + 8) ^ seed);
-    seed = _mix(_read64(data, offset + 16) ^ _smcSecret[1], _read64(data, offset + 24) ^ seed);
-    seed = _mix(_read64(data, offset + 32) ^ _smcSecret[2], _read64(data, offset + 40) ^ seed);
-    seed = _mix(_read64(data, offset + 48) ^ _smcSecret[3], _read64(data, offset + 56) ^ seed);
+    seed = _mix(_read64(data, offset) ^ _smcSecret[0],
+        _read64(data, offset + 8) ^ seed);
+    seed = _mix(_read64(data, offset + 16) ^ _smcSecret[1],
+        _read64(data, offset + 24) ^ seed);
+    seed = _mix(_read64(data, offset + 32) ^ _smcSecret[2],
+        _read64(data, offset + 40) ^ seed);
+    seed = _mix(_read64(data, offset + 48) ^ _smcSecret[3],
+        _read64(data, offset + 56) ^ seed);
     offset += 64;
     i -= 64;
   }
   if (i > 32) {
-    seed = _mix(_read64(data, offset) ^ _smcSecret[0], _read64(data, offset + 8) ^ seed);
-    seed = _mix(_read64(data, offset + 16) ^ _smcSecret[1], _read64(data, offset + 24) ^ seed);
+    seed = _mix(_read64(data, offset) ^ _smcSecret[0],
+        _read64(data, offset + 8) ^ seed);
+    seed = _mix(_read64(data, offset + 16) ^ _smcSecret[1],
+        _read64(data, offset + 24) ^ seed);
     offset += 32;
     i -= 32;
   }
   if (i > 16) {
-    seed = _mix(_read64(data, offset) ^ _smcSecret[0], _read64(data, offset + 8) ^ seed);
+    seed = _mix(_read64(data, offset) ^ _smcSecret[0],
+        _read64(data, offset + 8) ^ seed);
   }
 
   a = _read64(data, length - 16) ^ length;
@@ -178,16 +193,16 @@ int smchashSeeded(List<int> data, int seed) {
 /// Mutable seed wrapper for PRNG
 class SmcRandState {
   int _seed;
-  
+
   SmcRandState(this._seed);
-  
+
   /// Generate next random number
   int next() {
     final result = smcRand(_seed);
     _seed = result.$2;
     return result.$1;
   }
-  
+
   /// Current seed value
   int get seed => _seed;
 }
