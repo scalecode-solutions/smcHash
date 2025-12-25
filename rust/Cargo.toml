@@ -1,6 +1,6 @@
 [package]
 name = "smchash"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["ScaleCode Solutions"]
 description = "High-performance hash function passing all 188 SMHasher3 tests"

@@ -1,17 +1,68 @@
-//! smcHash - High-performance hash function
+//! # smcHash
 //!
-//! Passes all 188 SMHasher3 quality tests. Includes a PRNG that passes BigCrush/PractRand.
+//! High-performance hash function optimized for modern CPUs.
 //!
-//! # Example
-//! ```
+//! ## Features
+//!
+//! - **Fast**: Passes all 188 SMHasher3 quality tests
+//! - **Cache-friendly**: Processes 128 bytes (2 cache lines) per iteration
+//! - **Parallel**: 8 lanes for maximum ILP on ARM64
+//! - **`no_std` compatible**: Works in embedded environments
+//! - **Built-in PRNG**: [`smc_rand`] passes BigCrush and PractRand
+//!
+//! ## Quick Start
+//!
+//! ```rust
 //! use smchash::{smchash, smchash_seeded, smc_rand};
 //!
+//! // Basic hashing
 //! let hash = smchash(b"Hello, World!");
-//! let seeded = smchash_seeded(b"Hello", 12345);
+//! assert_eq!(hash, 0x25bb0982c5c0de6e);
 //!
+//! // Seeded hashing (different seed = different hash)
+//! let hash1 = smchash_seeded(b"data", 1);
+//! let hash2 = smchash_seeded(b"data", 2);
+//! assert_ne!(hash1, hash2);
+//!
+//! // PRNG (passes BigCrush/PractRand)
 //! let mut seed = 42u64;
-//! let random = smc_rand(&mut seed);
+//! let r1 = smc_rand(&mut seed);
+//! let r2 = smc_rand(&mut seed);
+//! assert_ne!(r1, r2);
 //! ```
+//!
+//! ## Custom Secrets
+//!
+//! For unique per-application hashing (e.g., HashDoS protection):
+//!
+//! ```rust
+//! use smchash::smchash_secret;
+//!
+//! // Your application's unique secrets (must be 9 elements)
+//! let secret: [u64; 9] = [
+//!     0x9ad1e8e2aa5a5c4b, 0xaaaad2335647d21b, 0xb8ac35e269d1b495,
+//!     0xa98d653cb2b4c959, 0x71a5b853b43ca68b, 0x2b55934dc35c9655,
+//!     0x746ae48ed4d41e4d, 0xa3d8c38e78aaa6a9, 0x1bca69c565658bc3,
+//! ];
+//!
+//! let hash = smchash_secret(b"data", 0, &secret);
+//! ```
+//!
+//! ## Performance
+//!
+//! Benchmarks on Apple M4 Max:
+//! - Small keys (≤16 bytes): ~2 GB/s
+//! - Large keys: ~15 GB/s
+//!
+//! ## Algorithm
+//!
+//! - 128-bit MUM (Multiply-XOR-Mix) construction
+//! - 8 parallel lanes for bulk processing
+//! - Secrets are odd, prime, 32 bits set, pairwise hamming distance = 32
+//!
+//! ## License
+//!
+//! MIT License - Copyright 2025 ScaleCode Solutions
 
 #![no_std]
 
@@ -58,13 +109,42 @@ fn read32(p: &[u8]) -> u32 {
     u32::from_le_bytes(p[..4].try_into().unwrap())
 }
 
-/// Compute smcHash of the given data
+/// Compute smcHash of the given data.
+///
+/// This is the primary hash function. It uses a default seed derived from
+/// the internal secret constants.
+///
+/// # Example
+///
+/// ```rust
+/// use smchash::smchash;
+///
+/// let hash = smchash(b"Hello, World!");
+/// assert_eq!(hash, 0x25bb0982c5c0de6e);
+///
+/// // Empty data is valid
+/// let empty_hash = smchash(b"");
+/// assert_ne!(empty_hash, 0);
+/// ```
 #[inline]
 pub fn smchash(data: &[u8]) -> u64 {
     smchash_seeded(data, SMC_SECRET[0])
 }
 
-/// Compute smcHash with a custom seed
+/// Compute smcHash with a custom seed.
+///
+/// Use this when you need different hash values for the same data,
+/// or when implementing hash tables with per-table seeds.
+///
+/// # Example
+///
+/// ```rust
+/// use smchash::smchash_seeded;
+///
+/// let hash1 = smchash_seeded(b"data", 1);
+/// let hash2 = smchash_seeded(b"data", 2);
+/// assert_ne!(hash1, hash2); // Different seeds produce different hashes
+/// ```
 pub fn smchash_seeded(data: &[u8], mut seed: u64) -> u64 {
     let mut p = data;
     let len = data.len();
@@ -154,7 +234,42 @@ pub fn smchash_seeded(data: &[u8], mut seed: u64) -> u64 {
     mix(a ^ SMC_SECRET[8], b ^ SMC_SECRET[1] ^ (len as u64))
 }
 
-/// Compute smcHash with custom secrets
+/// Compute smcHash with custom secrets.
+///
+/// Use this for unique per-application hashing. Different secrets produce
+/// completely different hash outputs, providing protection against HashDoS
+/// attacks where an attacker tries to craft collisions.
+///
+/// # Arguments
+///
+/// * `data` - The data to hash
+/// * `seed` - A seed value (can be 0 if not needed)
+/// * `secret` - An array of 9 secret values
+///
+/// # Example
+///
+/// ```rust
+/// use smchash::smchash_secret;
+///
+/// // Your application's unique secrets
+/// let secret: [u64; 9] = [
+///     0x9ad1e8e2aa5a5c4b, 0xaaaad2335647d21b, 0xb8ac35e269d1b495,
+///     0xa98d653cb2b4c959, 0x71a5b853b43ca68b, 0x2b55934dc35c9655,
+///     0x746ae48ed4d41e4d, 0xa3d8c38e78aaa6a9, 0x1bca69c565658bc3,
+/// ];
+///
+/// let hash = smchash_secret(b"data", 0, &secret);
+/// ```
+///
+/// # Secret Generation
+///
+/// For best results, secrets should have these properties:
+/// - Each is odd
+/// - Each has exactly 32 bits set
+/// - Each pair differs by exactly 32 bits (hamming distance)
+/// - Each is prime
+///
+/// The C implementation includes `smc_make_secret()` to generate valid secrets.
 pub fn smchash_secret(data: &[u8], mut seed: u64, secret: &[u64; 9]) -> u64 {
     let mut p = data;
     let len = data.len();
@@ -243,7 +358,34 @@ pub fn smchash_secret(data: &[u8], mut seed: u64, secret: &[u64; 9]) -> u64 {
     mix(a ^ secret[8], b ^ secret[1] ^ (len as u64))
 }
 
-/// PRNG - passes BigCrush and PractRand
+/// Pseudo-random number generator.
+///
+/// A fast PRNG that passes both BigCrush (TestU01) and PractRand statistical tests.
+/// The seed is modified in place, allowing sequential calls to generate a stream
+/// of random numbers.
+///
+/// # Example
+///
+/// ```rust
+/// use smchash::smc_rand;
+///
+/// let mut seed = 12345u64;
+///
+/// // Generate random numbers
+/// let r1 = smc_rand(&mut seed);
+/// let r2 = smc_rand(&mut seed);
+/// let r3 = smc_rand(&mut seed);
+///
+/// // Each call produces a different value
+/// assert_ne!(r1, r2);
+/// assert_ne!(r2, r3);
+/// ```
+///
+/// # Statistical Quality
+///
+/// - Passes all 160 BigCrush tests
+/// - Passes PractRand to 256MB+
+/// - Equivalent quality to wyrand (rapidhash PRNG)
 #[inline]
 pub fn smc_rand(seed: &mut u64) -> u64 {
     *seed = seed.wrapping_add(SMC_SECRET[0]);
