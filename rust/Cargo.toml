@@ -6,6 +6,8 @@ authors = ["ScaleCode Solutions"]
 description = "High-performance hash function passing all 188 SMHasher3 tests"
 license = "MIT"
 repository = "https://github.com/scalecode-solutions/smcHash"
+documentation = "https://docs.rs/smchash"
+readme = "README.md"
 keywords = ["hash", "hashing", "smchash", "fast"]
 categories = ["algorithms", "no-std"]
 
