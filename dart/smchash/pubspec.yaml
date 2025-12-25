@@ -1,0 +1,19 @@
+name: smchash
+description: High-performance hash function passing all 188 SMHasher3 tests. Includes PRNG that passes BigCrush/PractRand.
+version: 0.1.0
+repository: https://github.com/scalecode-solutions/smcHash
+homepage: https://github.com/scalecode-solutions/smcHash
+issue_tracker: https://github.com/scalecode-solutions/smcHash/issues
+
+topics:
+  - hash
+  - hashing
+  - cryptography
+  - random
+
+environment:
+  sdk: ^3.0.0
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.25.6
