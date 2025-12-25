@@ -1,3 +1,7 @@
+## 0.1.1
+
+- Fix dangling doc comment lint warning
+
 ## 0.1.0
 
 - Initial release

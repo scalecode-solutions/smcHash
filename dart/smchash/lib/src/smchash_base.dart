@@ -1,6 +1,6 @@
-/// smcHash - High-performance hash function
-///
-/// Passes all 188 SMHasher3 quality tests. Includes a PRNG that passes BigCrush/PractRand.
+// smcHash - High-performance hash function
+//
+// Passes all 188 SMHasher3 quality tests. Includes a PRNG that passes BigCrush/PractRand.
 
 /// Secret constants: odd, 32 bits set, pairwise hamming distance = 32, prime
 const List<int> _smcSecret = [
