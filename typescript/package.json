@@ -2,18 +2,30 @@
   "name": "smchash",
   "version": "0.1.0",
   "description": "High-performance hash function passing all 188 SMHasher3 tests",
-  "main": "smchash.js",
-  "types": "smchash.d.ts",
+  "main": "dist/smchash.js",
+  "types": "dist/smchash.d.ts",
+  "files": [
+    "dist/",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc",
+    "prepublishOnly": "npm run build",
     "test": "ts-node smchash.ts"
   },
-  "keywords": ["hash", "hashing", "smchash", "fast"],
+  "keywords": ["hash", "hashing", "smchash", "fast", "xxhash", "wyhash", "rapidhash"],
   "author": "ScaleCode Solutions",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/scalecode-solutions/smcHash"
+  },
+  "homepage": "https://github.com/scalecode-solutions/smcHash#readme",
+  "bugs": {
+    "url": "https://github.com/scalecode-solutions/smcHash/issues"
+  },
+  "engines": {
+    "node": ">=12.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
