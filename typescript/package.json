@@ -1,0 +1,23 @@
+{
+  "name": "smchash",
+  "version": "0.1.0",
+  "description": "High-performance hash function passing all 188 SMHasher3 tests",
+  "main": "smchash.js",
+  "types": "smchash.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "ts-node smchash.ts"
+  },
+  "keywords": ["hash", "hashing", "smchash", "fast"],
+  "author": "ScaleCode Solutions",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/scalecode-solutions/smcHash"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.0.0"
+  }
+}

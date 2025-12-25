@@ -1,0 +1,17 @@
+[package]
+name = "smchash"
+version = "0.1.0"
+edition = "2021"
+authors = ["ScaleCode Solutions"]
+description = "High-performance hash function passing all 188 SMHasher3 tests"
+license = "MIT"
+repository = "https://github.com/scalecode-solutions/smcHash"
+keywords = ["hash", "hashing", "smchash", "fast"]
+categories = ["algorithms", "no-std"]
+
+[features]
+default = ["std"]
+std = []
+
+[dev-dependencies]
+criterion = "0.5"
